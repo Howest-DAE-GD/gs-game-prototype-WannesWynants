@@ -1,5 +1,8 @@
 #include "pch.h"
 #include "Game.h"
+#include "utils.h"
+#include "SVGFiles.h"
+#include "iostream"
 
 Game::Game( const Window& window ) 
 	:BaseGame{ window }
@@ -12,55 +15,162 @@ Game::~Game( )
 	Cleanup( );
 }
 
+void Game::GetCollisionGround(const std::vector<std::vector<Point2f>>& vertices)
+{
+	Point2f m_P3{ m_PosBall.x - 14.f,m_PosBall.y + 14.f };
+	Point2f m_P1{ m_PosBall.x - 14.f,m_PosBall.y - 14.f };
+	Point2f m_P4{ m_PosBall.x + 14.f ,m_PosBall.y + 14.f };
+	Point2f m_P2{ m_PosBall.x + 14.f ,m_PosBall.y - 14.f };
+
+	utils::HitInfo result;
+
+	for (int idx{ 0 }; idx < vertices.size(); ++idx)
+	{
+		if (utils::Raycast(vertices[idx], m_P3, m_P1, result) || utils::Raycast(vertices[idx], m_P4, m_P2, result))
+		{
+			m_Velocity.y = 0;
+			m_PosBall.y = result.intersectPoint.y;
+
+		}
+
+	}
+}
+
 void Game::Initialize( )
 {
+	m_pMap = new Texture{ "Map2.png" };
+	m_pMain = new SVGFiles();
+	m_PosBall.x = GetViewPort().left + 30.f;
+	m_PosBall.y = GetViewPort().height - 30.f;
 	
 }
 
 void Game::Cleanup( )
 {
+	delete m_pMap;
+	m_pMap = nullptr;
 }
 
-void Game::Update( float elapsedSec )
+void Game::Update( float elapsedSec)
 {
-	// Check keyboard state
-	//const Uint8 *pStates = SDL_GetKeyboardState( nullptr );
-	//if ( pStates[SDL_SCANCODE_RIGHT] )
-	//{
-	//	std::cout << "Right arrow key is down\n";
-	//}
-	//if ( pStates[SDL_SCANCODE_LEFT] && pStates[SDL_SCANCODE_UP])
-	//{
-	//	std::cout << "Left and up arrow keys are down\n";
-	//}
+	GetCollisionGround(m_pMain->GetVertices());  
+
+	float speed{ 200.f * elapsedSec };
+	const float gravity{ -9.81f };
+	m_Velocity.y += gravity;
+	m_PosBall.y += m_Velocity.y * elapsedSec;
+
 }
 
 void Game::Draw( ) const
 {
 	ClearBackground( );
+
+	
+	glPushMatrix();
+	{
+		if (m_Rotation == RotationState::d90)
+		{
+			glTranslatef(533, 0, 0);
+			glRotatef(90, 0, 0, 1);
+			
+			m_pMap->Draw();
+		}
+		else if (m_Rotation == RotationState::d180)
+		{
+			glTranslatef(533, 534, 0);
+			glRotatef(180, 0, 0, 1);
+			
+			m_pMap->Draw();
+		}
+		else if (m_Rotation == RotationState::d270)
+		{
+			glTranslatef(0, 534, 0);
+			glRotatef(270, 0, 0, 1);
+			
+			m_pMap->Draw();
+		}
+		/*else if (m_Rotation == RotationState::d0)
+		{
+			glRotatef(0, 0, 0, 1);
+			glTranslatef(533, 0, 0);
+		}*/
+		m_pMap->Draw();
+
+	}
+	glPopMatrix();
+
+	utils::SetColor(Color4f(1.f, 0.f, 0.f, 1.f));
+
+	utils::FillEllipse(m_PosBall.x, m_PosBall.y, 7.f, 7.f);
+	utils::SetColor(Color4f(0.f, 0.f, 0.f, 1.f));
+	m_pMain->Draw();
+	
+	
 }
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
-	//std::cout << "KEYDOWN event: " << e.keysym.sym << std::endl;
+	/*std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
+	switch ( e.keysym.sym )
+	{
+	case SDLK_LEFT:
+		std::cout << "Left arrow key released\n";
+		rotation = true;
+		break;
+	case SDLK_RIGHT:
+		std::cout << "`Right arrow key released\n";
+		m_pMain->TransformPoints();
+		break;
+	case SDLK_1:
+	case SDLK_KP_1:
+		std::cout << "Key 1 released\n";
+		break;
+	}*/
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 {
-	//std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
-	//switch ( e.keysym.sym )
-	//{
-	//case SDLK_LEFT:
-	//	//std::cout << "Left arrow key released\n";
-	//	break;
-	//case SDLK_RIGHT:
-	//	//std::cout << "`Right arrow key released\n";
-	//	break;
-	//case SDLK_1:
-	//case SDLK_KP_1:
-	//	//std::cout << "Key 1 released\n";
-	//	break;
-	//}
+	switch (e.keysym.sym)
+	{
+	case SDLK_LEFT:
+		std::cout << "Left arrow key released\n";
+		if (m_Rotation == RotationState::d0)
+		{
+			m_Rotation = RotationState::d90;
+			m_TempPosBallY = m_PosBall.y;
+			m_TempPosBallX = m_PosBall.x;
+			m_PosBall.y = m_PosBall.x;
+			m_DistanceTemp = 533.f - m_TempPosBallX;
+			m_Distance = 533.f - m_DistanceTemp;
+			m_PosBall.x = m_Distance;
+			
+		}
+		else if (m_Rotation == RotationState::d90)
+		{
+			m_Rotation = RotationState::d180;
+			m_PosBall.x = m_PosBall.y;
+			//m_PosBall.y = 
+
+		}
+		else if (m_Rotation == RotationState::d180)
+		{
+			m_Rotation = RotationState::d270;
+
+
+		}
+		else if (m_Rotation == RotationState::d270)
+		{
+			m_Rotation = RotationState::d0;
+			m_TempPosBallY = m_PosBall.y;
+			m_TempPosBallX = m_PosBall.x;
+			m_PosBall.x = m_PosBall.y;
+			m_PosBall.y = m_PosBall.x;
+		}
+		m_pMain->TransformPoints();
+		std::cout << m_PosBall.x << " , " << m_PosBall.y << "\n";
+		break;
+	}
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )
@@ -105,6 +215,6 @@ void Game::ProcessMouseUpEvent( const SDL_MouseButtonEvent& e )
 
 void Game::ClearBackground( ) const
 {
-	glClearColor( 0.0f, 0.0f, 0.3f, 1.0f );
+	glClearColor( 0.2f, 0.2f, 0.2f, 1.0f );
 	glClear( GL_COLOR_BUFFER_BIT );
 }
