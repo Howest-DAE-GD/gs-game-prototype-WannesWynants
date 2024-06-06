@@ -6,7 +6,8 @@ public:
 	explicit SVGFiles();
 	std::vector<std::vector<Point2f>> GetVertices()const;
 	void Draw();
-	void TransformPoints();
+	void TransformPointsLeft();
+	void TransformpointsRight();
 
 private:
 	std::vector<std::vector<Point2f>> m_VerticesMain;

@@ -17,22 +17,28 @@ Game::~Game( )
 
 void Game::GetCollisionGround(const std::vector<std::vector<Point2f>>& vertices)
 {
-	Point2f m_P3{ m_PosBall.x - 14.f,m_PosBall.y + 14.f };
-	Point2f m_P1{ m_PosBall.x - 14.f,m_PosBall.y - 14.f };
-	Point2f m_P4{ m_PosBall.x + 14.f ,m_PosBall.y + 14.f };
-	Point2f m_P2{ m_PosBall.x + 14.f ,m_PosBall.y - 14.f };
+	Point2f m_P3{ m_PosBall.x, m_PosBall.y };
+	Point2f m_P1{ m_PosBall.x, m_PosBall.y - 7.f };
+	Point2f m_P4{ m_PosBall.x + 7.f ,m_PosBall.y };
+	Point2f m_P2{ m_PosBall.x - 7.f ,m_PosBall.y };
 
 	utils::HitInfo result;
 
 	for (int idx{ 0 }; idx < vertices.size(); ++idx)
 	{
-		if (utils::Raycast(vertices[idx], m_P3, m_P1, result) || utils::Raycast(vertices[idx], m_P4, m_P2, result))
+		if (utils::Raycast(vertices[idx], m_P3, m_P1, result))
 		{
 			m_Velocity.y = 0;
-			m_PosBall.y = result.intersectPoint.y;
-
+			m_PosBall.y = result.intersectPoint.y + 7.1f;
 		}
-
+		if (utils::Raycast(vertices[idx], m_P3, m_P4, result))
+		{
+			m_PosBall.x = result.intersectPoint.x - 7.1f;
+		}
+		if (utils::Raycast(vertices[idx], m_P3, m_P2, result))
+		{
+			m_PosBall.x = result.intersectPoint.x + 7.1f;
+		}
 	}
 }
 
@@ -90,11 +96,7 @@ void Game::Draw( ) const
 			
 			m_pMap->Draw();
 		}
-		/*else if (m_Rotation == RotationState::d0)
-		{
-			glRotatef(0, 0, 0, 1);
-			glTranslatef(533, 0, 0);
-		}*/
+		
 		m_pMap->Draw();
 
 	}
@@ -111,22 +113,16 @@ void Game::Draw( ) const
 
 void Game::ProcessKeyDownEvent( const SDL_KeyboardEvent & e )
 {
-	/*std::cout << "KEYUP event: " << e.keysym.sym << std::endl;
+	
 	switch ( e.keysym.sym )
 	{
-	case SDLK_LEFT:
-		std::cout << "Left arrow key released\n";
-		rotation = true;
+	case SDLK_a:
+		--m_PosBall.x;
 		break;
-	case SDLK_RIGHT:
-		std::cout << "`Right arrow key released\n";
-		m_pMain->TransformPoints();
+	case SDLK_d:
+		++m_PosBall.x;
 		break;
-	case SDLK_1:
-	case SDLK_KP_1:
-		std::cout << "Key 1 released\n";
-		break;
-	}*/
+	}
 }
 
 void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
@@ -140,37 +136,107 @@ void Game::ProcessKeyUpEvent( const SDL_KeyboardEvent& e )
 			m_Rotation = RotationState::d90;
 			m_TempPosBallY = m_PosBall.y;
 			m_TempPosBallX = m_PosBall.x;
+
 			m_PosBall.y = m_PosBall.x;
-			m_DistanceTemp = 533.f - m_TempPosBallX;
-			m_Distance = 533.f - m_DistanceTemp;
-			m_PosBall.x = m_Distance;
+
+			m_PosBall.x = 534.f - m_TempPosBallY;
 			
+
 		}
 		else if (m_Rotation == RotationState::d90)
 		{
 			m_Rotation = RotationState::d180;
-			m_PosBall.x = m_PosBall.y;
-			//m_PosBall.y = 
+			m_TempPosBallY = m_PosBall.y;
+			m_TempPosBallX = m_PosBall.x;
 
+			m_PosBall.y = m_PosBall.x;
+
+			m_PosBall.x = 534.f - m_TempPosBallY;
+			
 		}
 		else if (m_Rotation == RotationState::d180)
 		{
 			m_Rotation = RotationState::d270;
+			m_TempPosBallY = m_PosBall.y;
+			m_TempPosBallX = m_PosBall.x;
 
+			m_PosBall.y = m_PosBall.x;
 
+			m_PosBall.x = 534.f - m_TempPosBallY;
 		}
 		else if (m_Rotation == RotationState::d270)
 		{
 			m_Rotation = RotationState::d0;
 			m_TempPosBallY = m_PosBall.y;
 			m_TempPosBallX = m_PosBall.x;
-			m_PosBall.x = m_PosBall.y;
+
 			m_PosBall.y = m_PosBall.x;
+
+			m_PosBall.x = 534.f - m_TempPosBallY;
+
 		}
-		m_pMain->TransformPoints();
+		m_pMain->TransformPointsLeft();
+		std::cout << m_PosBall.x << " , " << m_PosBall.y << "\n";
+		break;
+	
+	case SDLK_RIGHT:
+		std::cout << "Right arrow key released\n";
+		if (m_Rotation == RotationState::d0)
+		{
+			m_Rotation = RotationState::d270;
+			m_TempPosBallX = m_PosBall.x;
+			m_TempPosBallY = m_PosBall.y;
+
+			m_DistanceTemp = 533.f - m_PosBall.x;
+			m_PosBall.y = m_DistanceTemp;
+
+			m_PosBall.x = m_TempPosBallY; 
+
+		}
+		else if (m_Rotation == RotationState::d90)
+		{
+			m_Rotation = RotationState::d0;
+			m_TempPosBallX = m_PosBall.x;
+			m_TempPosBallY = m_PosBall.y;
+
+			m_DistanceTemp = 533.f - m_PosBall.x;
+			m_PosBall.y = m_DistanceTemp;
+
+			m_PosBall.x = m_TempPosBallY;
+
+		}
+		else if (m_Rotation == RotationState::d180)
+		{
+			m_Rotation = RotationState::d90;
+			m_TempPosBallX = m_PosBall.x;
+			m_TempPosBallY = m_PosBall.y;
+
+			m_DistanceTemp = 533.f - m_PosBall.x;
+			m_PosBall.y = m_DistanceTemp;
+
+			m_PosBall.x = m_TempPosBallY;
+
+		}
+		else if (m_Rotation == RotationState::d270)
+		{
+			m_Rotation = RotationState::d180;
+			m_TempPosBallX = m_PosBall.x;
+			m_TempPosBallY = m_PosBall.y;
+
+			m_DistanceTemp = 533.f - m_PosBall.x;
+			m_PosBall.y = m_DistanceTemp;
+
+			m_PosBall.x = m_TempPosBallY;
+		}
+		m_pMain->TransformpointsRight();
 		std::cout << m_PosBall.x << " , " << m_PosBall.y << "\n";
 		break;
 	}
+
+	
+
+	
+
 }
 
 void Game::ProcessMouseMotionEvent( const SDL_MouseMotionEvent& e )

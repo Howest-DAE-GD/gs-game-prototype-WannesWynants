@@ -9,7 +9,7 @@
 SVGFiles::SVGFiles()
 
 {
-	if (!SVGParser::GetVerticesFromSvgFile("Map2.svg", m_VerticesMain))
+	if (!SVGParser::GetVerticesFromSvgFile("Map3.svg", m_VerticesMain))
 	{
 		std::cout << "ERROR LOADING SVGFILE";
 
@@ -33,13 +33,27 @@ void SVGFiles::Draw()
 		}
 	}
 }
-void SVGFiles::TransformPoints()
+void SVGFiles::TransformPointsLeft()
 {
 	Matrix2x3 rotationMat{};
 	Matrix2x3 transformMat{};
 	Matrix2x3 translateMat{};
 	translateMat.SetAsTranslate(533.f, 0);
 	rotationMat.SetAsRotate(90);
+	transformMat = translateMat * rotationMat;
+	for (int idx{}; idx < m_VerticesMain.size(); ++idx)
+	{
+		m_VerticesMain[idx] = transformMat.Transform(m_VerticesMain[idx]);
+	}
+}
+
+void SVGFiles::TransformpointsRight()
+{
+	Matrix2x3 rotationMat{};
+	Matrix2x3 transformMat{};
+	Matrix2x3 translateMat{};
+	translateMat.SetAsTranslate(0, 534.f);
+	rotationMat.SetAsRotate(-90);
 	transformMat = translateMat * rotationMat;
 	for (int idx{}; idx < m_VerticesMain.size(); ++idx)
 	{
