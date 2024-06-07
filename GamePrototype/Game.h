@@ -5,6 +5,7 @@
 #include "Vector2f.h"
 
 class SVGFiles;
+class People;
 class Game : public BaseGame
 {
 public:
@@ -27,14 +28,27 @@ public:
 	void ProcessMouseUpEvent( const SDL_MouseButtonEvent& e ) override;
 
 private:
-
+	std::vector<People*> m_People;
 	
+	int m_Timer;
+	float m_TimerFloat;
+	Texture* m_pTimer;
+	Texture* m_pTimeUp;
+	bool m_IsTimeUp;
 	Texture* m_pMap;
 	SVGFiles* m_pMain;
 	Point2f m_PosBall;
 	float m_TempPosBallX, m_TempPosBallY,m_DistanceTemp,m_Distance;
 	Vector2f m_Velocity;
 	bool m_IsLeft;
+	Rectf m_Exit, m_ExitBottom, m_ExitRight, m_ExitTop, m_ExitLeft;
+	Rectf m_TempExit;
+	Texture* m_pEscaped;
+	Texture* m_pScore;
+	bool m_IsEscaped;
+	bool m_IsA, m_IsD;
+	int m_CollectedPeople;
+
 	//bool rotation;
 	
 	enum class RotationState {

@@ -29,7 +29,7 @@ void SVGFiles::Draw()
 	{
 		for (int idx2{}; idx2 < m_VerticesMain[idx].size(); ++idx2)
 		{
-			utils::DrawPoint(m_VerticesMain[idx][idx2], 4.f);
+			//utils::DrawPoint(m_VerticesMain[idx][idx2], 4.f);
 		}
 	}
 }
@@ -38,7 +38,7 @@ void SVGFiles::TransformPointsLeft()
 	Matrix2x3 rotationMat{};
 	Matrix2x3 transformMat{};
 	Matrix2x3 translateMat{};
-	translateMat.SetAsTranslate(533.f, 0);
+	translateMat.SetAsTranslate(533.5f, 0);
 	rotationMat.SetAsRotate(90);
 	transformMat = translateMat * rotationMat;
 	for (int idx{}; idx < m_VerticesMain.size(); ++idx)
@@ -52,7 +52,7 @@ void SVGFiles::TransformpointsRight()
 	Matrix2x3 rotationMat{};
 	Matrix2x3 transformMat{};
 	Matrix2x3 translateMat{};
-	translateMat.SetAsTranslate(0, 534.f);
+	translateMat.SetAsTranslate(0, 533.5f);
 	rotationMat.SetAsRotate(-90);
 	transformMat = translateMat * rotationMat;
 	for (int idx{}; idx < m_VerticesMain.size(); ++idx)
